@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Replication System</title>
+    <meta name="description"
+        content="Extract and reconstruct handwritten signatures using computer vision. Upload a signature image and get a feature-based reconstruction.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <!-- ── Background Effects ─────────────────────────────────── -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow--1"></div>
+    <div class="bg-glow bg-glow--2"></div>
+
+    <!-- ── Header ─────────────────────────────────────────────── -->
+    <header id="app-header">
+        <div class="header-content">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 32 C12 10, 20 8, 22 20 S28 32, 32 12" stroke="url(#logo-grad)" stroke-width="3"
+                        stroke-linecap="round" fill="none" />
+                    <defs>
+                        <linearGradient id="logo-grad" x1="8" y1="32" x2="32" y2="12">
+                            <stop offset="0%" stop-color="#a78bfa" />
+                            <stop offset="100%" stop-color="#06b6d4" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <h1>Photo Replicator</h1>
+            </div>
+            <p class="tagline">Feature-based Photo reconstruction using computer vision</p>
+        </div>
+    </header>
+
+    <!-- ── Main Content ───────────────────────────────────────── -->
+    <main id="app-main">
+        <!-- Upload Section -->
+        <section id="upload-section" class="glass-card">
+            <h2>Upload Photo</h2>
+            <p class="section-desc">Drop an image of a Photo (JPG or PNG)</p>
+
+            <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Upload Photo image">
+                <div class="drop-zone__content">
+                    <svg class="drop-zone__icon" viewBox="0 0 64 64" fill="none">
+                        <rect x="8" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2" />
+                        <path d="M24 40 L32 30 L40 40" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <circle cx="22" cy="26" r="3" stroke="currentColor" stroke-width="2" />
+                        <path d="M32 8 V20 M26 14 L32 8 L38 14" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span class="drop-zone__label">Drag &amp; drop or <strong>click to browse</strong></span>
+                    <span class="drop-zone__hint">Supports JPG, JPEG, PNG &bull; Max 10 MB</span>
+                </div>
+                <input type="file" id="file-input" accept=".jpg,.jpeg,.png" hidden>
+            </div>
+
+            <!-- Preview -->
+            <div id="preview-container" class="preview-container hidden">
+                <div class="preview-card">
+                    <span class="preview-label">Selected Image</span>
+                    <img id="preview-image" alt="Photo preview">
+                    <button id="clear-btn" class="btn btn--ghost" aria-label="Clear selection">✕ Clear</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-row">
+                <button id="replicate-btn" class="btn btn--primary" disabled>
+                    <span class="btn__text">Replicate Photo</span>
+                    <span class="btn__loader hidden">
+                        <span class="spinner"></span>Processing…
+                    </span>
+                </button>
+                <label class="toggle-label">
+                    <input type="checkbox" id="show-steps-toggle" checked>
+                    <span class="toggle-slider"></span>
+                    Show processing steps
+                </label>
+            </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="loader-ring"></div>
+            <p class="loader-text">Analyzing Photo strokes…</p>
+        </div>
+
+        <!-- Results Section -->
+        <section id="results-section" class="hidden">
+            <!-- Comparison -->
+            <div class="comparison-row">
+                <div id="original-card" class="result-card glass-card">
+                    <h3>Original Input</h3>
+                    <div class="result-image-wrap">
+                        <img id="result-original" alt="Original Photo">
+                    </div>
+                </div>
+                <div class="comparison-arrow">
+                    <svg viewBox="0 0 48 24" fill="none">
+                        <path d="M0 12H44M36 4l8 8-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div id="reconstructed-card" class="result-card glass-card result-card--primary">
+                    <h3>Reconstructed Photo</h3>
+                    <div class="result-image-wrap">
+                        <img id="result-reconstructed" alt="Reconstructed Photo">
+                    </div>
+                    <button id="download-btn" class="btn btn--accent">
+                        <svg viewBox="0 0 20 20" fill="none" class="btn-icon">
+                            <path d="M10 3v10m0 0l-3-3m3 3l3-3M4 15h12" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        Download
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metadata -->
+            <div id="metadata-card" class="glass-card metadata-card">
+                <h3>Analysis Metadata</h3>
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <span class="meta-label">Processing Time</span>
+                        <span id="meta-time" class="meta-value">—</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Contours Detected</span>
+                        <span id="meta-contours" class="meta-value">—</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Avg Stroke Width</span>
+                        <span id="meta-stroke" class="meta-value">—</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Output Size</span>
+                        <span id="meta-size" class="meta-value">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Steps -->
+            <div id="steps-section" class="glass-card steps-section hidden">
+                <h3>Processing Pipeline Steps</h3>
+                <p class="section-desc">Visualize every stage of the reconstruction pipeline</p>
+                <div id="steps-grid" class="steps-grid"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ── Footer ─────────────────────────────────────────────── -->
+    <footer id="app-footer">
+        <p>Photo Replication System &bull; Built with FastAPI &amp; OpenCV &bull; Feature-based reconstruction, not
+            pixel copying</p>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
