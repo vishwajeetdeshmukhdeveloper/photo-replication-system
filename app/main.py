@@ -18,7 +18,7 @@ from app.api.routes import router
 # ── App Initialization ─────────────────────────────────────────────────────────
 
 app = FastAPI(
-    title="Signature Replication System",
+    title="Photo Replication System",
     description=(
         "A computer vision application that extracts stroke patterns from "
         "handwritten signatures and reconstructs them on a clean canvas."
