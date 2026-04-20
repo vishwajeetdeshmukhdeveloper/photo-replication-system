@@ -1,5 +1,5 @@
 """
-Signature Replication Pipeline
+Photo Replication Pipeline
 ──────────────────────────────
 End-to-end orchestrator that chains:
 

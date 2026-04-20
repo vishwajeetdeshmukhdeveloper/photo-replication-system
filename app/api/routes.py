@@ -1,5 +1,5 @@
 """
-API Routes for Signature Replication System
+API Routes for Photo Replication System
 ────────────────────────────────────────────
 Defines all HTTP endpoints for the application.
 """
@@ -8,7 +8,7 @@ import uuid
 import time
 from pathlib import Path
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 
 from app.config import ALLOWED_EXTENSIONS, MAX_FILE_SIZE_MB, UPLOAD_DIR, OUTPUT_DIR
 from app.core.pipeline import SignatureReplicationPipeline
@@ -103,6 +103,29 @@ async def replicate_with_steps(file: UploadFile = File(...)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Processing failed: {str(e)}")
+
+
+@router.get("/api/download/{request_id}")
+async def download_reconstructed_image(request_id: str):
+    """
+    Download the reconstructed signature image as a PNG file.
+    
+    Args:
+        request_id: The request ID returned from the /api/replicate endpoint.
+    
+    Returns:
+        PNG image file.
+    """
+    output_path = OUTPUT_DIR / f"{request_id}_reconstructed.png"
+    
+    if not output_path.exists():
+        raise HTTPException(status_code=404, detail="Image not found. Please replicate first.")
+    
+    return FileResponse(
+        path=output_path,
+        filename="reconstructed_signature.png",
+        media_type="image/png"
+    )
 
 
 def _validate_upload(file: UploadFile):

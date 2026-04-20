@@ -34,6 +34,7 @@
 
     let selectedFile = null;
     let reconstructedBase64 = null;
+    let currentRequestId = null;
 
     // ── Drop Zone Interactions ────────────────────────────────────────────
 
@@ -104,6 +105,7 @@
     function resetSelection() {
         selectedFile = null;
         reconstructedBase64 = null;
+        currentRequestId = null;
         fileInput.value = "";
         previewContainer.classList.add("hidden");
         dropZone.style.display = "";
@@ -156,6 +158,9 @@
         // Original preview
         resultOriginal.src = previewImage.src;
 
+        // Store request ID for download
+        currentRequestId = data.request_id;
+
         // Reconstructed image
         const finalImg = data.final_image || data.reconstructed_image;
         reconstructedBase64 = finalImg;
@@ -202,10 +207,10 @@
     // ── Download ──────────────────────────────────────────────────────────
 
     downloadBtn.addEventListener("click", () => {
-        if (!reconstructedBase64) return;
+        if (!currentRequestId) return;
 
         const link = document.createElement("a");
-        link.href = `data:image/png;base64,${reconstructedBase64}`;
+        link.href = `/api/download/${currentRequestId}`;
         link.download = "reconstructed_signature.png";
         document.body.appendChild(link);
         link.click();
